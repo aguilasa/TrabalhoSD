@@ -1,4 +1,4 @@
-package com.github.aguilasa;
+package com.github.aguilasa.smartphone;
 
 import static javax.swing.JOptionPane.DEFAULT_OPTION;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;

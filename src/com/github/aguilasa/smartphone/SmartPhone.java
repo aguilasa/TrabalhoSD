@@ -1,4 +1,4 @@
-package com.github.aguilasa;
+package com.github.aguilasa.smartphone;
 
 public class SmartPhone {
 

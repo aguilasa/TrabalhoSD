@@ -1,4 +1,4 @@
-package com.github.aguilasa;
+package com.github.aguilasa.smartphone;
 
 import java.awt.Component;
 import java.awt.Cursor;
