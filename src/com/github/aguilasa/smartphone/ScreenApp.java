@@ -8,6 +8,7 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
+import com.github.aguilasa.common.Chronometer;
 import com.github.aguilasa.common.Processing;
 
 public class ScreenApp extends BaseScreen {
@@ -18,6 +19,7 @@ public class ScreenApp extends BaseScreen {
 	private SocketAddress socketAddress = null;
 	private ReceiveReader receiveReader;
 	private Thread receiveThread;
+	private Sender sender;
 
 	public ScreenApp() {
 		super();
@@ -33,10 +35,12 @@ public class ScreenApp extends BaseScreen {
 		} catch (Exception e) {
 			closeApplication(true);
 		}
-		
+
 		receiveReader = new ReceiveReader();
 		receiveThread = new Thread(receiveReader);
 		receiveThread.start();
+		sender = new Sender(2);
+		sender.resume();
 	}
 
 	class ReceiveReader extends Processing {
@@ -47,6 +51,7 @@ public class ScreenApp extends BaseScreen {
 
 		@Override
 		public void doingRun() {
+			System.out.println("oi");
 			byte[] buf = new byte[1024];
 			DatagramPacket p = null;
 			try {
@@ -55,9 +60,27 @@ public class ScreenApp extends BaseScreen {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			//String line = new String(p.getData(), 0, p.getLength());
+			// String line = new String(p.getData(), 0, p.getLength());
+		}
+	}
+
+	class Sender extends Chronometer {
+
+		public Sender(int seconds) {
+			super(seconds);
 		}
 
+		@Override
+		protected void task() {
+			try {
+				String buf = "";
+				byte[] b = buf.getBytes();
+				DatagramPacket packet = new DatagramPacket(b, 0, b.length, socketAddress);
+				multicastSocket.send(packet);
+			} catch (IOException e) {
+				this.pause();
+			}
+		}
 	}
 
 }
