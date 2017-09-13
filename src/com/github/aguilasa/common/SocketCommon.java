@@ -48,7 +48,6 @@ public class SocketCommon {
 						bos.write(bis.read());
 					}
 				}
-
 			}
 		}
 	}
