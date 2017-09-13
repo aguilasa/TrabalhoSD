@@ -35,15 +35,16 @@ public class SocketCommon {
 		try (BufferedInputStream bis = new BufferedInputStream(socket.getInputStream()); DataInputStream dis = new DataInputStream(bis);) {
 			int filesCount = dis.readInt();
 			File[] files = new File[filesCount];
+			System.out.println("Files count: " + filesCount);
 
 			for (int i = 0; i < filesCount; i++) {
 				long fileLength = dis.readLong();
 				String fileName = dis.readUTF();
+				System.out.println("File name: " + fileName);
 
 				files[i] = new File(dirPath + "/" + fileName);
 
 				try (FileOutputStream fos = new FileOutputStream(files[i]); BufferedOutputStream bos = new BufferedOutputStream(fos);) {
-
 					for (int j = 0; j < fileLength; j++) {
 						bos.write(bis.read());
 					}
