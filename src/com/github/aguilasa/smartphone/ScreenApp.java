@@ -8,6 +8,9 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.github.aguilasa.common.Chronometer;
 import com.github.aguilasa.common.Processing;
 
@@ -30,7 +33,8 @@ public class ScreenApp extends BaseScreen {
 			multicastSocket = new MulticastSocket(4321);
 			multicastSocket.setLoopbackMode(false);
 
-			NetworkInterface networkInterface = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
+			InetAddress localHost = InetAddress.getLocalHost();
+			NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost);
 			multicastSocket.joinGroup(socketAddress, networkInterface);
 		} catch (Exception e) {
 			closeApplication(true);
@@ -46,12 +50,11 @@ public class ScreenApp extends BaseScreen {
 	class ReceiveReader extends Processing {
 
 		public ReceiveReader() {
-			pause();
+			resume();
 		}
 
 		@Override
 		public void doingRun() {
-			System.out.println("oi");
 			byte[] buf = new byte[1024];
 			DatagramPacket p = null;
 			try {
@@ -60,7 +63,16 @@ public class ScreenApp extends BaseScreen {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			// String line = new String(p.getData(), 0, p.getLength());
+			String value = new String(p.getData(), 0, p.getLength());
+			try {
+				JSONObject json = new JSONObject(value);
+				if (json.has("type") && json.getInt("type") == 2) {
+					System.out.println(json.getInt("port"));
+					System.out.println(json.getString("ip"));
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -73,11 +85,13 @@ public class ScreenApp extends BaseScreen {
 		@Override
 		protected void task() {
 			try {
-				String buf = "";
-				byte[] b = buf.getBytes();
+				JSONObject json = new JSONObject();
+				json.put("type", 1);
+				String message = json.toString();
+				byte[] b = message.getBytes();
 				DatagramPacket packet = new DatagramPacket(b, 0, b.length, socketAddress);
 				multicastSocket.send(packet);
-			} catch (IOException e) {
+			} catch (IOException | JSONException e) {
 				this.pause();
 			}
 		}
