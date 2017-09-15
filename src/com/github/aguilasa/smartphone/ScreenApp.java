@@ -8,6 +8,7 @@ import static javax.swing.JOptionPane.showOptionDialog;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -33,6 +34,8 @@ import org.json.JSONObject;
 
 import com.github.aguilasa.common.Chronometer;
 import com.github.aguilasa.common.Processing;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ScreenApp extends JFrame {
 
@@ -40,6 +43,8 @@ public class ScreenApp extends JFrame {
 
 	private JPanel moverPanel;
 	protected JPanel panel;
+	private JButton btnSearch;
+	private JButton btnStart;
 
 	private MulticastSocket multicastSocket = null;
 	private SocketAddress socketAddress = null;
@@ -140,11 +145,32 @@ public class ScreenApp extends JFrame {
 		panel.setBounds(9, 46, 222, 390);
 		getContentPane().add(panel);
 		panel.setLayout(new BorderLayout(5, 5));
-		
-		JPanel p = new JPanel();
-		JButton btn = new JButton("Button 1 (PAGE_START)");
-		p.add(btn);
+
+		initializeButtons();
+	}
+
+	private void initializeButtons() {
+		JPanel p = new JPanel(new GridLayout(1, 2));
 		panel.add(p, BorderLayout.PAGE_START);
+		
+		btnSearch = new JButton("Procurar");
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		btnStart = new JButton("Iniciar");
+		btnStart.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		
+		btnSearch.setEnabled(true);
+		btnStart.setEnabled(false);
+		
+		p.add(btnSearch);
+		p.add(btnStart);
 	}
 
 	private void initializeSockets() {
