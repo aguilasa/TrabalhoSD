@@ -51,11 +51,12 @@ public class ScreenApp extends JFrame {
 	private ReceiveReader receiveReader;
 	private Thread receiveThread;
 	private Sender sender;
+	private final ScreenApp app;
 
 	class ReceiveReader extends Processing {
 
 		public ReceiveReader() {
-			resume();
+			pause();
 		}
 
 		@Override
@@ -74,6 +75,7 @@ public class ScreenApp extends JFrame {
 				if (json.has("type") && json.getInt("type") == 2) {
 					System.out.println(json.getInt("port"));
 					System.out.println(json.getString("ip"));
+					//app.pause();
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -103,6 +105,7 @@ public class ScreenApp extends JFrame {
 	}
 
 	public ScreenApp() {
+		this.app = this;
 		initializeComponents();
 		addListeners();
 		setSizeLocation();
@@ -152,25 +155,44 @@ public class ScreenApp extends JFrame {
 	private void initializeButtons() {
 		JPanel p = new JPanel(new GridLayout(1, 2));
 		panel.add(p, BorderLayout.PAGE_START);
-		
+
 		btnSearch = new JButton("Procurar");
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				search();
 			}
 		});
 		btnStart = new JButton("Iniciar");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				start();
 			}
 		});
-		
+
 		btnSearch.setEnabled(true);
 		btnStart.setEnabled(false);
-		
+
 		p.add(btnSearch);
 		p.add(btnStart);
+	}
+
+	private void search() {
+		resume();
+		btnSearch.setEnabled(false);
+	}
+
+	private void resume() {
+		receiveReader.resume();
+		sender.resume();
+	}
+
+	private void pause() {
+		receiveReader.pause();
+		sender.pause();
+	}
+
+	private void start() {
+
 	}
 
 	private void initializeSockets() {

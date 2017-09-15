@@ -79,7 +79,7 @@ public class BackupService {
 				byte[] b = message.getBytes();
 				DatagramPacket packet = new DatagramPacket(b, 0, b.length, socketAddress);
 				multicastSocket.send(packet);
-				this.pause();
+				//this.pause();
 			} catch (IOException | JSONException e) {
 				this.pause();
 			}
