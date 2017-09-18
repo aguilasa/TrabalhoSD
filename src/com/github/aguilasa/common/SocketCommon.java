@@ -42,11 +42,11 @@ public class SocketCommon {
 			File[] files = new File[filesCount];
 
 			ProgressBarManager pbMan = new ProgressBarManager(progressBar);
-			pbMan.setValues(0, filesCount);
+			pbMan.setValues(1, filesCount);
+			pbMan.update(0);
 			System.out.println("Files count: " + filesCount);
 
 			for (int i = 0; i < filesCount; i++) {
-				pbMan.update(i + 1);
 				long fileLength = dis.readLong();
 				String fileName = dis.readUTF();
 				System.out.println("File name: " + fileName);
@@ -58,7 +58,9 @@ public class SocketCommon {
 						bos.write(bis.read());
 					}
 				}
+				pbMan.update(i + 1);
 			}
+			pbMan.update(0);
 		}
 	}
 }
