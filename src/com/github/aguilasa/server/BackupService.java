@@ -1,5 +1,6 @@
 package com.github.aguilasa.server;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 import javax.swing.JFrame;
+import javax.swing.JProgressBar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +36,7 @@ public class BackupService {
 	private boolean isBackupService = true;
 	private Backup backup;
 	private Thread backupThred;
+	private JProgressBar progressBar;
 
 	class Backup extends Processing {
 
@@ -44,7 +47,9 @@ public class BackupService {
 					System.out.println("Waiting...");
 					try (Socket socket = serverSocket.accept();) {
 						System.out.println("Accepted connection : " + socket);
-						SocketCommon.receiveMultipleFiles("received", socket);
+						addProgressBar();
+						SocketCommon.receiveMultipleFiles("received", socket, progressBar);
+						removeProgressBar();
 						System.out.println("Done.");
 					}
 				}
@@ -95,19 +100,23 @@ public class BackupService {
 		@Override
 		protected void task() {
 			try {
-				JSONObject json = new JSONObject();
-				json.put("type", 2);
-				json.put("ip", SERVER);
-				json.put("port", SERVICEPORT);
-
-				String message = json.toString();
+				String message = createResponse();
 				byte[] b = message.getBytes();
 				DatagramPacket packet = new DatagramPacket(b, 0, b.length, socketAddress);
 				multicastSocket.send(packet);
-				// this.pause();
 			} catch (IOException | JSONException e) {
 				this.pause();
 			}
+		}
+
+		private String createResponse() throws JSONException {
+			JSONObject json = new JSONObject();
+			json.put("type", 2);
+			json.put("ip", SERVER);
+			json.put("port", SERVICEPORT);
+
+			String message = json.toString();
+			return message;
 		}
 	}
 
@@ -167,11 +176,23 @@ public class BackupService {
 		receiveThread = new Thread(receiveReader);
 		receiveThread.start();
 		sender = new Sender(2);
-		
-		Backup backup = new Backup();;
-		Thread backupThred = new Thread(backup);
+
+		backup = new Backup();
+		backupThred = new Thread(backup);
 		backupThred.start();
 		backup.resume();
+	}
+
+	private void addProgressBar() {
+		progressBar = new JProgressBar();
+		frame.getContentPane().add(progressBar, BorderLayout.LINE_END);
+		frame.repaint();
+	}
+
+	private void removeProgressBar() {
+		frame.getContentPane().remove(progressBar);
+		progressBar = null;
+		frame.repaint();
 	}
 
 }
