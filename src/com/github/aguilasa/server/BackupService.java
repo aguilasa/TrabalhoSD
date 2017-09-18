@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketAddress;
 
 import javax.swing.JFrame;
@@ -16,6 +18,7 @@ import org.json.JSONObject;
 
 import com.github.aguilasa.common.Chronometer;
 import com.github.aguilasa.common.Processing;
+import com.github.aguilasa.common.SocketCommon;
 
 public class BackupService {
 
@@ -29,6 +32,28 @@ public class BackupService {
 	private Thread receiveThread;
 	private Sender sender;
 	private boolean isBackupService = true;
+	private Backup backup;
+	private Thread backupThred;
+
+	class Backup extends Processing {
+
+		@Override
+		public void doingRun() {
+			try (ServerSocket serverSocket = new ServerSocket(SERVICEPORT);) {
+				while (true) {
+					System.out.println("Waiting...");
+					try (Socket socket = serverSocket.accept();) {
+						System.out.println("Accepted connection : " + socket);
+						SocketCommon.receiveMultipleFiles("received", socket);
+						System.out.println("Done.");
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
 
 	class ReceiveReader extends Processing {
 
@@ -79,7 +104,7 @@ public class BackupService {
 				byte[] b = message.getBytes();
 				DatagramPacket packet = new DatagramPacket(b, 0, b.length, socketAddress);
 				multicastSocket.send(packet);
-				//this.pause();
+				// this.pause();
 			} catch (IOException | JSONException e) {
 				this.pause();
 			}
@@ -142,6 +167,11 @@ public class BackupService {
 		receiveThread = new Thread(receiveReader);
 		receiveThread.start();
 		sender = new Sender(2);
+		
+		Backup backup = new Backup();;
+		Thread backupThred = new Thread(backup);
+		backupThred.start();
+		backup.resume();
 	}
 
 }

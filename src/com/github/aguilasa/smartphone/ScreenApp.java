@@ -22,7 +22,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
+import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -34,6 +36,8 @@ import org.json.JSONObject;
 
 import com.github.aguilasa.common.Chronometer;
 import com.github.aguilasa.common.Processing;
+import com.github.aguilasa.common.SocketCommon;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -52,6 +56,12 @@ public class ScreenApp extends JFrame {
 	private Thread receiveThread;
 	private Sender sender;
 	private final ScreenApp app;
+	private ServerData serverData = null;
+
+	class ServerData {
+		public int port = 0;
+		public String ip = "";
+	}
 
 	class ReceiveReader extends Processing {
 
@@ -73,9 +83,13 @@ public class ScreenApp extends JFrame {
 			try {
 				JSONObject json = new JSONObject(value);
 				if (json.has("type") && json.getInt("type") == 2) {
+					serverData = new ServerData();
+					serverData.port = Integer.valueOf(json.getInt("port"));
+					serverData.ip = json.getString("ip");
 					System.out.println(json.getInt("port"));
 					System.out.println(json.getString("ip"));
-					//app.pause();
+					app.pause();
+					checkButtonsStates();
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -192,7 +206,22 @@ public class ScreenApp extends JFrame {
 	}
 
 	private void start() {
+		if (serverData != null) {
+			try (Socket socket = new Socket(serverData.ip, serverData.port);) {
+				File[] files = new File("files/").listFiles();
+				SocketCommon.sendMultipleFiles(files, socket);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				serverData = null;
+				checkButtonsStates();
+			}
+		}
+	}
 
+	private void checkButtonsStates() {
+		btnSearch.setEnabled(serverData == null);
+		btnStart.setEnabled(serverData != null);
 	}
 
 	private void initializeSockets() {

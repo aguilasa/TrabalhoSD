@@ -12,11 +12,11 @@ public class ServerBackup {
 	public static void main(String[] args) throws IOException {
 		try (ServerSocket serverSocket = new ServerSocket(SOCKET_PORT);) {
 			while (true) {
-				System.out.println("Waiting...");
+				System.out.println("Esperando...");
 				try (Socket socket = serverSocket.accept();) {
-					System.out.println("Accepted connection : " + socket);
+					System.out.println("Conexão aceita: " + socket);
 					SocketCommon.receiveMultipleFiles("received", socket);
-					System.out.println("Done.");
+					System.out.println("Terminado.");
 				}
 			}
 		}
