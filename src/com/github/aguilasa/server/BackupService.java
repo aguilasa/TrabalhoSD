@@ -14,6 +14,7 @@ import java.net.SocketAddress;
 
 import javax.swing.JFrame;
 import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +37,7 @@ public class BackupService {
 	private boolean isBackupService = true;
 	private Backup backup;
 	private Thread backupThred;
-	private JProgressBar progressBar;
+	private JProgressBar progressBar = new JProgressBar();;
 
 	class Backup extends Processing {
 
@@ -47,9 +48,8 @@ public class BackupService {
 					System.out.println("Waiting...");
 					try (Socket socket = serverSocket.accept();) {
 						System.out.println("Accepted connection : " + socket);
-						addProgressBar();
+
 						SocketCommon.receiveMultipleFiles("received", socket, progressBar);
-						removeProgressBar();
 						System.out.println("Done.");
 					}
 				}
@@ -147,6 +147,7 @@ public class BackupService {
 		this.isBackupService = isBackupService;
 		initialize();
 		initializeSockets();
+		addProgressBar();
 	}
 
 	/**
@@ -184,14 +185,12 @@ public class BackupService {
 	}
 
 	private void addProgressBar() {
-		progressBar = new JProgressBar();
-		frame.getContentPane().add(progressBar, BorderLayout.LINE_END);
+		frame.getContentPane().add(progressBar, BorderLayout.PAGE_END);
 		frame.repaint();
 	}
 
 	private void removeProgressBar() {
 		frame.getContentPane().remove(progressBar);
-		progressBar = null;
 		frame.repaint();
 	}
 

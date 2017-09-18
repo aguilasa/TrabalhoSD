@@ -42,7 +42,7 @@ public class SocketCommon {
 			File[] files = new File[filesCount];
 
 			ProgressBarManager pbMan = new ProgressBarManager(progressBar);
-			pbMan.setValues(0, filesCount - 1);
+			pbMan.setValues(0, filesCount);
 			System.out.println("Files count: " + filesCount);
 
 			for (int i = 0; i < filesCount; i++) {
